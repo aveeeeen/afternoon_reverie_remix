@@ -1,0 +1,133 @@
+-- afternoon reverie tidalcycles edit
+:h
+
+duplicate 10 "---- Afternoon Reverie (braven tidalcycles edit) ----"
+
+hush 
+
+do
+    let trackio = do  
+            -- p "d1" silence -- main drums
+            -- p "d2" silence -- clap
+            -- p "b" silence -- break sample
+            -- p "ar" silence -- arimurasann sample
+            p "bass" silence -- bass pads
+            p "" silence 
+        fx = 
+            void
+            .whenmod 8 7(
+                void
+                .(# hpf (fast 0.5 $ "50 .. 1" * "80"))
+                .(# hpq 0.1)
+            )
+            .whenmod 8 8 (
+                void
+                    .filter "lpf" 80 (1/8)
+            )
+        fx' = 
+            void
+            .whenmod 4 0 (
+                void
+                . whenmod 4 0 (
+                        void
+                        -- .st "1*4"
+                        -- .(#l 0.8)
+                )
+            )         
+            -- . swng
+        fx'' = void -- .(#r "0.02*16")
+        func =
+            void
+            -- .func1
+            -- .func2
+            .func3
+        sub = 
+            void 
+            .send2
+            . fx'
+    setcps (135/240)
+    p "d1" -- bassdrums and hihats
+        $ (
+            void
+            .fx
+            .fx'
+            .fx''
+            .whenmod 8 7 (
+                send2
+            )
+        )
+        -- $ st ("{1*1}%4" ) 
+        $ stack
+        [
+            ""
+            -- ,big 0.6 1.1 $ st "1 [0 1] [0 1] [1]" $ "kik" #n "0" # nt "4"
+            ,big 0.6 1 $ st "[1 1?]*8" $ "hh*4" # n "1 . 0 1 . 1 . 1 0"
+        ]
+        # l 1
+        # orbit 1
+    p "d2" -- clap samples
+        $ (
+            void
+            .big 0.8 1
+            .fx 
+            .func
+            -- .sub
+            .sometimes (sub)
+            -- .fx'
+        )
+        $ st "0 1 0 [0 1]" $ "clap" # distort 0.6
+        # l 1
+        # orbit 2
+    p "ar" -- afternoon reverie samples
+        $ (
+            void
+            .fx .func 
+            .fx''
+        )
+        -- $ st "{1*8}%2" 
+        $ stack 
+        [
+            ""
+            ,big 0.6 1.05 $ every 3 ( sub )
+            $ st "{1*1}%8" 
+            $ la "4"
+            $ slice 8 "0 .. 15" 
+            $ "ar" # hpf 200 # n 0
+            ,big 0.7 1.1
+            -- $jux (rev)
+            -- $ st "{1*1}%4"
+            $ slice 16 "0 .. 15" 
+            $ la 8 
+            -- $ randslice 16
+            $ "arv" # n 0 # hpf 200 # hpq 0.01 
+            -- |+| l 0.15
+        ] 
+        |+| l 0.8
+        # orbit 3
+    p "b" -- breaks
+        $ (
+            void
+            .func
+            -- .filter "lpf" 40 "1/8"
+            -- .sometimes  (jux (|* speed "-2") . sub)
+            .big 0.3 1
+            .fx
+            -- .chop 2
+        )
+        $ st "1*16" 
+        $ slice 16 (irand 53) $ la 2 $ "jj1"
+        # r 0.6 # l 0.8 # n 27 # orbit 4 # hpf 100
+    p "bass" 
+        $ (
+            void
+            .fx
+            .fx''
+            .big 0.1 1.0
+        )
+        -- $ st "{1 0 1 0 0 1} %16"
+        $ "supersaw"
+        # voice 0 # pitch1 ("0.5") # lfo 10 # rate (saw*2) # decay ("0.3") 
+        # nt (slow 1 ("<10 9 2 2>" |+| ("-12" |*| 3 ) |+| "0" )) -- (2 = iv) 10 9 2 2 or 10 9 12 14
+        -- # lpf ( "100" )
+        # l 0.9 # orbit 5
+    trackio
